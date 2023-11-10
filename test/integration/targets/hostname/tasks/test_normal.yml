@@ -24,7 +24,7 @@
     - assert:
         that:
           - >
-            'Invalid hostname' not in command_result.msg
+            'illegal option' not in command_result.msg
           - >
             'hostnamectl: invalid option' not in command_result.msg
 
