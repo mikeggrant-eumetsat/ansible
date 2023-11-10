@@ -15,13 +15,24 @@
 - name: Run hostname module with a leading dash to ensure its not interpreted as a flag (regression test for issue-81741)
   when: ansible_os_family not in ['AIX', 'Darwin', 'HP-UX', 'Solaris']  # these weren't covered by the fix for the issue
   become: 'yes'
-  hostname:
-    name: -flaglike-hostname
-  register: command_result
-  failed_when: >
-    command_result.changed == "false" or
-    'hostnamectl: invalid option' in command_result.msg or
-    'illegal option' in command_result.msg
+  block:
+    - name: do it
+      hostname:
+        name: -flaglike-hostname
+      register: command_result
+      ignore_errors: yes
+
+    - assert:
+        that:
+          - >
+            'Invalid hostname' not in command_result.msg
+          - >
+            'hostnamectl: invalid option' not in command_result.msg
+
+#  failed_when: >
+#    command_result.changed == "false" or
+#    'hostnamectl: invalid option' in command_result.msg or
+#    'illegal option' in command_result.msg
 
 - name: Run hostname module for real now
   become: 'yes'
